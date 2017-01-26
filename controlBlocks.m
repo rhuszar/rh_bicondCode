@@ -1,9 +1,38 @@
 
+%{
+
+This file contains blocks of code used to generate trial sequences for the
+second round of the biconditional experiment. The following are the trial
+types presented to 2 groups of rats (lights have been counterbalanced
+across groups).
+
+   Condition A
+   1. light -> noise- (light1 -> sound2 -)
+   2. light -> click+  (light1 -> sound1 +)
+   3. flash -> click-  (light2 -> sound1 -)
+   4. flash -> noise+ (light2 -> sound2 +)
+
+   Condition B
+   1. flash -> noise- (light2 -> sound2 -)
+   2. flash -> click+  (light2 -> sound1 +)
+   3. light -> click-  (light1 -> sound1 -)
+   4. light -> noise+ (light1 -> sound2 +)
+
+Trial types 2 and 4 are rewarded, 1 and 3 are nonrewarded. Trial types are
+presented in blocks of 4. A block of each trial type appears twice per
+sequence, meaning each sequence has 32 trials.
+
+Run the blocks in the order as they appear - the variable 'finalSequences'
+will contain the sequences generated.
+
+%}
+
+
 %%
 
 % Determine which trials are rewarded and which not.
-% NOTE: you should set path to file to be able to call functions
-%       isSeqValid.m and getTrialSeq.m from within controlBlocks
+% NOTE: you should set path to correct folder to be able to call the
+%       function EditDistance.m
 cd('/Users/romanhuszar/Desktop/Thesis-materials/myWorkspace/myMATLABCode/rh_bicondCode');
 
 myTrials = {'AX-', 'AY+', 'BY-', 'BY+'};
@@ -149,37 +178,71 @@ rewB = rewB(randperm(size(rewB,1)),:);
 unrewB = unrewB(randperm(size(unrewB,1)),:);
 finalSequences=[];
 
+% Here is where you would exclude the sequences we have already presented
+% to the rats - get rid of the first 3 rewarded, and subsequent 2
+% unrewarded
+
+% what you do - while statement
+
 while size(finalSequences,1)<50
     
-    x = 1;
-    if (flag)
-        % add 3 sequences starting with rewarded block
-        while x<=3
-            if (i == size(rewB,1))
-                i = 1;
-                rewB = rewB(randperm(size(rewB,1)),:);
-            else
-                finalSequences=[finalSequences; rewB(i,:)];
-                i = i+1;
-                x = x+1;
+    myBlock = [];    % block of sequences we're about to add
+    switch flag
+        % add block of 3 sequences - 2:1 rewarded to unrewarded starts
+        case 1
+            % add 2 rewarded sequences to block
+            while size(myBlock,1)~=2
+                if (i == size(rewB,1))
+                    i = 1;
+                    rewB = rewB(randperm(size(rewB,1)),:);
+                else
+                    myBlock=[myBlock; rewB(i,:)];
+                    i=i+1;
+                end
             end
-        end
-        flag=0;
-    else
-        % add 2 sequences starting with unrewarded block
-        while x<=2
-            if (j == size(unrewB,1))
-                j = 1;
-                unrewB = unrewB(randperm(size(unrewB,1)),:);
-            else
-                finalSequences=[finalSequences; unrewB(j,:)];
-                j = j+1;
-                x = x+1;
+            % add 1 unrewarded sequnce to block
+            while size(myBlock,1)~=3
+                if (j == size(unrewB,1))
+                    j = 1;
+                    unrewB = unrewB(randperm(size(unrewB,1)),:);
+                else
+                    myBlock=[myBlock; unrewB(j,:)];
+                    j=j+1;
+                end
             end
-        end
-        flag=1;
+            % randomize block, add to our sequences, and switch flag
+            myBlock = myBlock(randperm(size(myBlock,1)),:);
+            finalSequences = [finalSequences; myBlock];
+            flag = 0;  
+            
+        % add 2 sequences - 1:1 rewarded to unrewarded starts, randomized
+        case 0
+            % add 1 rewarded sequence to block
+            while size(myBlock,1)~=1
+                if (i == size(rewB,1))
+                    i = 1;
+                    rewB = rewB(randperm(size(rewB,1)),:);
+                else
+                    myBlock=[myBlock; rewB(i,:)];
+                    i=i+1;
+                end
+            end
+            % add 1 unrewarded sequnce to block
+            while size(myBlock,1)~=2
+                if (j == size(unrewB,1))
+                    j = 1;
+                    unrewB = unrewB(randperm(size(unrewB,1)),:);
+                else
+                    myBlock=[myBlock; unrewB(j,:)];
+                    j=j+1;
+                end
+            end
+            % randomize block, add to our sequences, and switch flag
+            myBlock = myBlock(randperm(size(myBlock,1)),:);
+            finalSequences = [finalSequences; myBlock];
+            flag = 1;      
     end
-    
+             
 end
 
 %%
